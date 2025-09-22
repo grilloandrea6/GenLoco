@@ -35,6 +35,7 @@ from motion_imitation.robots import anymal_b_simple, anymal_c_simple,base_robot,
 from motion_imitation.robots import a1
 from motion_imitation.real_a1 import a1_robot_real
 from stable_baselines.common.callbacks import CheckpointCallback
+import datetime
 
 TIMESTEPS_PER_ACTORBATCH = 4096
 OPTIM_BATCHSIZE = 256
@@ -117,7 +118,7 @@ def train(model, env, total_timesteps, output_dir="", int_save_freq=0, use_curr=
 
   return
 
-def test(model, env, num_procs, num_episodes=None):
+def test(model, env, num_procs, num_episodes=None, robot_name="unknown"):
   curr_return = 0
   sum_return = 0
   episode_count = 0
@@ -128,10 +129,23 @@ def test(model, env, num_procs, num_episodes=None):
     num_local_episodes = np.inf
 
   o = env.reset()
+  counter = 0
+
+  obs_buffer = []
+  act_buffer = []
+
   while episode_count < num_local_episodes:
     a, _ = model.predict(o, deterministic=True)
+
+    obs_buffer.append(o)
+    act_buffer.append(a)
+
+
     o, r, done, info = env.step(a)
     curr_return += r
+
+    counter += 1
+    print("Step: " + str(counter))
 
     if done:
         o = env.reset()
@@ -146,6 +160,14 @@ def test(model, env, num_procs, num_episodes=None):
   if MPI.COMM_WORLD.Get_rank() == 0:
       print("Mean Return: " + str(mean_return))
       print("Episode Count: " + str(episode_count))
+  
+  obs_array = np.array(obs_buffer)   # (N, 451)
+  act_array = np.array(act_buffer)   # (N, 12)
+
+  date_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+  filename = f"dataset/{robot_name}_dataset_{date_str}.npz"
+  np.savez(filename, obs=obs_array, act=act_array)
+
 
   return
 
@@ -156,7 +178,7 @@ def main():
   arg_parser.add_argument("--motion_file", dest="motion_file", type=str, default="motion_imitation/data/motions/a1_pace.txt")
   arg_parser.add_argument("--visualize", dest="visualize", action="store_true", default=False)
   arg_parser.add_argument("--output_dir", dest="output_dir", type=str, default="output")
-  arg_parser.add_argument("--num_test_episodes", dest="num_test_episodes", type=int, default=None)
+  arg_parser.add_argument("--num_test_episodes", dest="num_test_episodes", type=int, default=10)
   arg_parser.add_argument("--model_file", dest="model_file", type=str, default="")
   arg_parser.add_argument("--total_timesteps", dest="total_timesteps", type=int, default=2e8)
   arg_parser.add_argument("--int_save_freq", dest="int_save_freq", type=int, default=0) # save intermediate model every n policy steps
@@ -211,7 +233,8 @@ def main():
       test(model=model,
            env=env,
            num_procs=num_procs,
-           num_episodes=args.num_test_episodes)
+           num_episodes=args.num_test_episodes,
+           robot_name=args.robot)
   else:
       assert False, "Unsupported mode: " + args.mode
 
