@@ -4,6 +4,7 @@ docker run -it --rm \
     --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
     -v .:/GenLoco \
     -v ./torchGenLoco:/torchGenLoco \
+    -v ~/genloco-loihi:/genloco-loihi \
     genloco \
     bash \
 
