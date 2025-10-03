@@ -376,15 +376,35 @@ class LocomotionGymEnv(gym.Env):
         aspect=float(self._render_width) / self._render_height,
         nearVal=0.1,
         farVal=100.0)
-    (_, _, px, _, _) = self._pybullet_client.getCameraImage(
-        width=self._render_width,
-        height=self._render_height,
-        renderer=self._pybullet_client.ER_BULLET_HARDWARE_OPENGL,
-        viewMatrix=view_matrix,
-        projectionMatrix=proj_matrix)
-    rgb_array = np.array(px)
-    rgb_array = rgb_array[:, :, :3]
+    
+    
+    w, h, rgb_tuple, depth, seg = self._pybullet_client.getCameraImage(
+      width=self._render_width,
+      height=self._render_height,
+      renderer=self._pybullet_client.ER_TINY_RENDERER,
+      viewMatrix=view_matrix,
+      projectionMatrix=proj_matrix
+    )
+
+# Convert tuple to numpy array and reshape
+    rgb_array = np.array(rgb_tuple, dtype=np.uint8)
+    rgb_array = rgb_array.reshape((h, w, 4))[:, :, :3]  # HxWx3
     return rgb_array
+
+    
+    # (_, _, px, _, _) = self._pybullet_client.getCameraImage(
+    #     width=self._render_width,
+    #     height=self._render_height,
+    #     renderer=self._pybullet_client.ER_TINY_RENDERER,#ER_BULLET_HARDWARE_OPENGL,
+    #     viewMatrix=view_matrix,
+    #     projectionMatrix=proj_matrix)
+
+    
+    # print("px type:", type(px))
+    # print("px shape:",px[0], getattr(px, "shape", "N/A"))
+    # rgb_array = np.array(px)
+    # rgb_array = rgb_array[:, :, :3]
+    # return rgb_array
 
   def get_ground(self):
     """Get simulation ground model."""

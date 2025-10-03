@@ -321,7 +321,7 @@ class Spot(base_robot.Base_robot):
 
       texUid = self._pybullet_client.loadTexture("robot_descriptions/spot_description/meshes/grey.png")
       for link_id in self._lower_link_ids+self._hip_link_ids:
-        if link_id is not -1:
+        if link_id != -1:
           self._pybullet_client.changeVisualShape( self.quadruped, link_id, textureUniqueId=texUid)
   def _GetMotorNames(self):
     return MOTOR_NAMES

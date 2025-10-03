@@ -196,17 +196,17 @@ class Minitaur(object):
       raise ValueError("on_rack and reset_at_current_position "
                        "cannot be enabled together")
 
-    if isinstance(motor_kp, (collections.Sequence, np.ndarray)):
+    if isinstance(motor_kp, (collections.abc.Sequence, np.ndarray)):
       self._motor_kps = np.asarray(motor_kp)
     else:
       self._motor_kps = np.full(num_motors, motor_kp)
 
-    if isinstance(motor_kd, (collections.Sequence, np.ndarray)):
+    if isinstance(motor_kd, (collections.abc.Sequence, np.ndarray)):
       self._motor_kds = np.asarray(motor_kd)
     else:
       self._motor_kds = np.full(num_motors, motor_kd)
 
-    if isinstance(motor_torque_limits, (collections.Sequence, np.ndarray)):
+    if isinstance(motor_torque_limits, (collections.abc.Sequence, np.ndarray)):
       self._motor_torque_limits = np.asarray(motor_torque_limits)
     elif motor_torque_limits is None:
       self._motor_torque_limits = None
@@ -1239,12 +1239,12 @@ class Minitaur(object):
       kp: proportional gain(s) of the motors.
       kd: derivative gain(s) of the motors.
     """
-    if isinstance(kp, (collections.Sequence, np.ndarray)):
+    if isinstance(kp, (collections.abc.Sequence, np.ndarray)):
       self._motor_kps = np.asarray(kp)
     else:
       self._motor_kps = np.full(self.num_motors, kp)
 
-    if isinstance(kd, (collections.Sequence, np.ndarray)):
+    if isinstance(kd, (collections.abc.Sequence, np.ndarray)):
       self._motor_kds = np.asarray(kd)
     else:
       self._motor_kds = np.full(self.num_motors, kd)
