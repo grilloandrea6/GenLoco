@@ -12,3 +12,4 @@ output/
 logs/
 tf_model/
 *.pyc
+bash_history
